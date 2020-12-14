@@ -6,7 +6,7 @@ import scipy
 import os
 
 
-def overdetermined_ls_test_matrix_generator(m, n, diagonal=None, fill_diagonal_method='one large', condition_number=None, a_cond=24, distribution_fn=np.random.uniform, a=0, b=1):
+def overdetermined_ls_test_matrix_generator(m, n, diagonal=None, fill_diagonal_method='one large', condition_number=None, a_cond=24, distribution_fn=np.random.uniform, a=0, b=1, seed=123):
     """
     Test matrix generator
 
@@ -29,7 +29,8 @@ def overdetermined_ls_test_matrix_generator(m, n, diagonal=None, fill_diagonal_m
     1. Add Householders Transformation / Given Rotations from Lawn 9
 
     """
-
+    
+    np.random.seed(seed)
     # ----------------------------------------------------------------------------------------------------------------------------
     # 1. Generate condition_number: Randomly pick a condition number k with log_2 k distributed uniformly in [0, a_cond]
     # ----------------------------------------------------------------------------------------------------------------------------
@@ -174,3 +175,4 @@ def create_fast_solver_test_matrix(n, d, path, save_matrices=False, condition_nu
         np.savetxt(os.path.join(path, 'b_{}_{}.txt'.format(n, d)), b, fmt='%d')
 
     return A, true_x, b
+
