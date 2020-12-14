@@ -2,6 +2,8 @@ import numpy as np
 from numpy.linalg import norm
 import random
 import math
+import scipy
+import os
 
 
 def overdetermined_ls_test_matrix_generator(m, n, diagonal=None, fill_diagonal_method='one large', condition_number=None, a_cond=24, distribution_fn=np.random.uniform, a=0, b=1):
@@ -139,3 +141,36 @@ def overdetermined_ls_test_matrix_generator(m, n, diagonal=None, fill_diagonal_m
     x = np.matmul(np.linalg.pinv(A), b)
 
     return A, x, b
+
+
+def create_fast_solver_test_matrix(n, d, path, save_matrices=False, condition_number=400, sparse=False, density=0.25):
+    if sparse:
+        A = scipy.sparse.random(n, d, density=density).toarray()
+    else:
+        # Calculate sigma based on condition number required.
+        sigma = round(1 / (condition_number ** (1 / (d - 1))), 2)
+
+        # 1. Create test matrix A
+        U, _ = np.linalg.qr(np.random.standard_normal((n, d)))
+        V, _ = np.linalg.qr(np.random.standard_normal((d, d)))
+        s = [sigma ** (i + 1) for i in range(d)]
+        A = (U * s).dot(V.T)
+        if n < d:
+            A = A.T
+
+    # 2. Create x
+    x = np.random.normal(loc=0, scale=1 / d, size=d).reshape(d, 1)
+
+    # 3. Sample a response vector b ~ N(Ax, I_n)
+    b = np.random.multivariate_normal(np.matmul(A, x).reshape(n, ), np.eye(n)).reshape(n, 1)
+
+    # 4. True x
+    true_x = np.matmul(np.linalg.pinv(A), b)
+
+    # Option to save generated matrices.
+    if save_matrices:
+        np.savetxt(os.path.join(path, 'A_{}_{}.txt'.format(n, d)), A, fmt='%d')
+        np.savetxt(os.path.join(path, 'x_{}_{}.txt'.format(n, d)), true_x, fmt='%d')
+        np.savetxt(os.path.join(path, 'b_{}_{}.txt'.format(n, d)), b, fmt='%d')
+
+    return A, true_x, b
