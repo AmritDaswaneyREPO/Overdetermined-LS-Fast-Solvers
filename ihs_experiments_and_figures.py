@@ -186,8 +186,7 @@ def generate_figure_2_and_4(n, d, solver_config, working_directory, number_of_it
 
 def generate_figure_3(d, working_directory, solver_config, number_of_trials, alpha, number_of_iterations, sparse=False):
     m = alpha * d
-    # 128, 256, 512, 1024, 2048, 4096, 8192,
-    for n in [16384]:
+    for n in [128, 256, 512, 1024, 2048, 4096, 8192, 16384]:
         # print('-'*40)
         # print('n = {}'.format(n))
         # print('-'*40)
